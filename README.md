@@ -1,6 +1,6 @@
 # Auction Bidding API
 
-## Assignment ID
+## Assignment ID START OF ReadME.md
 
 `v#hdf38%44`
 
@@ -201,3 +201,28 @@ The bids collection maintains the history of accepted bids separately from the c
 | `404 Not Found` | Auction does not exist |
 | `409 Conflict` | Bid rejected due to auction state, closing time, or bidding rules |
 | `500 Internal Server Error` | Unexpected server error |
+
+
+
+
+
+
+
+### 1. Data model
+I used separate Auction and Bid models. The Auction stores the current highest bid and bidder for quick access, while Bid stores the history of accepted bids.
+
+### 2. Auction close boundary
+A bid is accepted only if the auction is open and the server time is before its closing time. At the exact closing time, the bid is rejected.
+
+### 3. Handling new bids
+I validate the request and check the current bid before updating the auction. I use an atomic conditional update and a transaction to keep the auction's top bid and bid history consistent when requests arrive concurrently.
+
+### 4. User bidding on their own top bid
+I reject the bid if the user is already the highest bidder. This avoids unnecessary bid increases by the same user.
+
+### 5. What I would improve for production
+I would add idempotency keys so retries return the original result instead of being treated as new requests. I would also add authentication and authorization rather than trusting the supplied `user_id`.
+
+
+## Assignment ID END OF ReadME.md
+v#hdf38%44
