@@ -1,26 +1,29 @@
-import express from 'express';
-const rootRouter = require('./src/routes/index.js');
+require('dotenv').config();
 
+const express = require('express');
+const mongoose = require('mongoose');
+const routes = require('./src/routes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(express.json()); 
-app.use(express.urlencoded({ extended: true })); 
+app.use(routes);
 
-app.use('/', rootRouter);
+const startServer = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
 
-// Global Error Handling Middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({
-        status: 'error',
-        message: 'Something went wrong internally'
+    const port = process.env.PORT || 3000;
+
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
     });
-});
+  } catch (error) {
+    console.error('Failed to start server:', error.message);
+    process.exit(1);
+  }
+};
 
-// Start the server
-app.listen(PORT, () => {
-    console.log(`🚀 Server is running on http://localhost:${PORT}`);
-});
+startServer();
